@@ -12,4 +12,8 @@
         Color = color;
         Name = name;
     }
+    override public string ToString()
+    {
+        return $"ID: {Id}, Название: {Name}, Шанс выпадения: {DropChance * 100}%, Цвет: {Color}";
+    }
 }

@@ -1,11 +1,11 @@
 ﻿class Program
 {
-    private static Random random = new();
+    private static readonly Random random = new();
     static void Main()
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-        Data.Rarities.Add(new Rarity(0.60m, ConsoleColor.Gray, "Обычный"));
+        Data.Rarities.Add(new Rarity(0.60m, ConsoleColor.White, "Обычный"));
         Data.Rarities.Add(new Rarity(0.25m, ConsoleColor.Blue, "Редкий"));
         Data.Rarities.Add(new Rarity(0.10m, ConsoleColor.Magenta, "Эпический"));
         Data.Rarities.Add(new Rarity(0.05m, ConsoleColor.Yellow, "Легендарный"));
@@ -75,9 +75,9 @@
             Console.WriteLine("4. Работа с предметами");
             Console.WriteLine("5. Пополнить баланс");
             Console.WriteLine("6. Инвентарь");
-            Console.WriteLine("7. Выход");
+            Console.WriteLine("0. Выход");
 
-            switch (Input("Выберите действие: ", 1, 7))
+            switch (Input("Выберите действие: ", 0, 7))
             {
                 case 1:
                     Console.Clear();
@@ -86,7 +86,7 @@
 
                 case 2:
                     Console.Clear();
-
+                    RarityActions();
                     break;
 
                 case 3:
@@ -125,7 +125,7 @@
                     PressToContinue();
                     break;
 
-                case 7:
+                case 0:
                     return;
             }
         }
@@ -142,9 +142,9 @@
             Console.WriteLine("3. Создать лутбокс");
             Console.WriteLine("4. Открыть лутбокс");
             Console.WriteLine("5. Редактировать лутбокс");
-            Console.WriteLine("6. В главное меню");
+            Console.WriteLine("0. В главное меню");
 
-            switch (Input("Выберите действие: ", 1, 6))
+            switch (Input("Выберите действие: ", 0, 6))
             {
                 case 1:
                     Console.Clear();
@@ -241,8 +241,44 @@
                     PressToContinue();
                     break;
 
+                case 5:
+                    LootBox boxToEdit = Data.LootBoxes[Input("Введите ID лутбокса, в который вы хотите изменить: ", 0, Data.LootBoxes.Count - 1)];
+                    Console.Clear();
+                    EditMenu();
 
-                case 6:
+                    void EditMenu()
+                    {
+                        while (true)
+                        {
+                            Console.WriteLine("Выбранный лутбокс для редактирования:");
+                            boxToEdit.PrintLootBox();
+                            Console.WriteLine();
+                            Console.WriteLine("1. Изменить название");
+                            Console.WriteLine("2. Изменить цену");
+                            Console.WriteLine("0. Выход");
+
+                            switch (Input("Выберите действие: ", 0, 3))
+                            {
+                                case 1:
+                                    boxToEdit.Name = Input("Введите новое название лутбокса: ");
+                                    Console.WriteLine("Название успешно изменено!");
+                                    PressToContinue();
+                                    break;
+                                case 2:
+                                    boxToEdit.Cost = Input("Введите новую цену лутбокса: ", 0m, 1000000m);
+                                    Console.WriteLine("Цена успешно изменена!");
+                                    PressToContinue();
+                                    break;
+                                case 0:
+                                    Console.Clear();
+                                    return;
+
+                            }
+                        }
+                    }
+                    break;
+
+                case 0:
                     Console.Clear();
                     return;
             }
@@ -251,23 +287,88 @@
         {
             foreach (LootBox lootBox in Data.LootBoxes)
             {
-                Console.WriteLine($"Лутбокс: {lootBox.Id}, Название: {lootBox.Name}, Колличество предметов: {lootBox.ItemCount}");
-                Console.WriteLine($"Описание: {lootBox.Description}");
-                Console.WriteLine("Предметы:");
-                foreach (LootBoxItem lbi in Data.LootBoxItems)
-                {
-                    if (lbi.LootBoxId == lootBox.Id)
-                    {
-                        foreach (Item item in Data.Items)
-                        {
-                            if (item.Id == lbi.ItemId)
-                            {
-                                Console.WriteLine(item);
-                            }
-                        }
-                    }
-                }
+                lootBox.PrintLootBox();
                 Console.WriteLine();
+            }
+        }
+    }
+
+    static void RarityActions()
+    {
+        while (true)
+        {
+            PrintRarities();
+            Console.WriteLine();
+            Console.WriteLine("1. Вывести список редкостей");
+            Console.WriteLine("2. Добавить новую редкость");
+            Console.WriteLine("3. Редактировать редкость");
+            Console.WriteLine("4. Удалить редкость");
+            Console.WriteLine("0. В главное меню");
+            switch (Input("Выберите действие: ", 0, 4))
+            {
+                case 1:
+                    Console.Clear();
+                    PrintRarities();
+                    PressToContinue();
+                    break;
+                case 2:
+                    Console.Clear();
+
+                    if (Data.AvaliableColors.Count == 0)
+                    {
+                        Console.WriteLine("Максимальное количество редкостей");
+                        PressToContinue();
+                        continue;
+                    }
+
+                    string name = Input("Введите название редкости: ");
+                                        
+                    for (int i = 0; i < Data.AvaliableColors.Count; i++)
+                    {
+                        ConsoleColor c = Data.AvaliableColors[i];
+                        Console.ForegroundColor = c;
+                        Console.WriteLine($"{i,2}. " + c.ToString());
+                        Console.ResetColor();
+                    }
+
+                    ConsoleColor color = Data.AvaliableColors[Input($"Введите цвет редкости (0 - {Data.AvaliableColors.Count}): ", 0, Data.AvaliableColors.Count)];
+
+                    Data.AvaliableColors.Remove(color);
+
+                    decimal dropChance = Input("Введите шанс выпадения редкости (от 0 до 100): ", 0m, 100m) / 100m;
+
+                    Data.Rarities.Add(new Rarity(dropChance, color, name));
+
+                    Console.WriteLine("Добавлена новая редкость:");
+                    Console.ForegroundColor = color;
+                    Console.WriteLine(Data.Rarities[^1]);
+                    Console.ResetColor();
+                    PressToContinue();
+                    break;
+                case 3:
+                    Console.Clear();
+
+                    PressToContinue();
+                    break;
+                case 4:
+                    Console.Clear();
+
+                    PressToContinue();
+                    break;
+                case 0:
+                    Console.Clear();
+                    return;
+            }
+        }
+
+        static void PrintRarities()
+        {
+            Console.WriteLine("Список редкостей:");
+            foreach (Rarity rarity in Data.Rarities)
+            {
+                Console.ForegroundColor = rarity.Color;
+                Console.WriteLine(rarity);
+                Console.ResetColor();
             }
         }
     }

@@ -8,6 +8,8 @@
     public static List<LootBox> LootBoxes = [];
     public static List<LootBoxItem> LootBoxItems = [];
 
+    public static List<ConsoleColor> AvaliableColors = [ConsoleColor.DarkGray, ConsoleColor.Green, ConsoleColor.Cyan, ConsoleColor.Red];
+
     public static List<Item> InventoryItems = [];
 
     public static void Dodep(decimal money)
